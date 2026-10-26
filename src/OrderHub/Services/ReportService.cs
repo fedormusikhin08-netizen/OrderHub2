@@ -56,4 +56,49 @@ public class ReportService
         return products.OrderBy(p => p.Price).FirstOrDefault();
     }
 
+    // ---- Этап 6. КТ36: проекции, фильтрация, группировка ----
+
+    // ЗАДАЧА: метод принимает IEnumerable<Product> и возвращает IEnumerable<CategorySummary>
+    public List<CategorySummary> SummarizeByCategory(IEnumerable<Product> products)
+    {
+        // ЗАДАЧА1: сгруппируйте товары по полю Category через GroupBy
+        // ЗАДАЧА2: для каждой группы посчитайте количество товаров (g.Count())
+        // ЗАДАЧА3: посчитайте среднюю цену (g.Average(p => p.Price))
+        // ЗАДАЧА4: спроецируйте результат в CategorySummary с полями
+        // Category = g.Key, Count = …, AveragePrice = …
+        // ЗАДАЧА5: отсортируйте сводку по убыванию количества товаров через OrderByDescending
+        // ЗАДАЧА6: материализуйте через ToList()
+        // ВАЖНО: агрегаты обязаны считаться LINQ-методами прямо на группе;
+        // ручной цикл со счётчиком не засчитывается
+        return products
+            .GroupBy(p => p.Category)
+            .Select(g => new CategorySummary
+            {
+                Category = g.Key,
+                Count = g.Count(),
+                AveragePrice = g.Average(p => p.Price)
+            })
+            .OrderByDescending(s => s.Count)
+            .ToList();
+    }
+
+    public CategorySummary? MostExpensiveCategory(IEnumerable<Product> products)
+    {
+        // ЗАДАЧА: найдите самую дорогую категорию (средняя цена максимальна)
+        // подсказка: OrderByDescending(s => s.AveragePrice).First()
+        return SummarizeByCategory(products)
+            .OrderByDescending(s => s.AveragePrice)
+            .FirstOrDefault();
+    }
+
+    public List<string> CategoriesWithAtLeast(IEnumerable<Product> products, int minCount)
+    {
+        // ЗАДАЧА: найдите категории, где товаров не меньше заданного числа,
+        // и спроецируйте только названия таких категорий через Select
+        return SummarizeByCategory(products)
+            .Where(s => s.Count >= minCount)
+            .Select(s => s.Category)
+            .ToList();
+    }
+
 }
