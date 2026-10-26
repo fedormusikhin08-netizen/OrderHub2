@@ -11,6 +11,8 @@ var products = SeedData.CreateProducts();
 foreach (var product in products)
     catalog.AddProduct(product.Name, product.Price, product.Category);
 
+var reports = new ReportService();
+
 void RunAllDemos()
 {
     // ---- КТ31: очередь Queue, стек Stack, список List ----
@@ -58,6 +60,18 @@ void RunAllDemos()
     catalog.PrintSortedByName();                  // NameComparer: по алфавиту
     catalog.PrintSortedByNameLength();            // лямбда Comparison<T>: по длине названия
     catalog.PrintSortedByPriceDesc();             // PriceDescComparer: по убыванию цены
+
+    // ---- КТ35: базовые LINQ-запросы ----
+    Console.WriteLine("\n--- КТ35: Where → OrderBy → Select и агрегаты Count/Any/All/First ---");
+    const decimal threshold = 5000m;
+    Console.WriteLine($"Дороже {threshold:0.00}₽:");
+    foreach (var line in reports.ExpensiveProducts(products, threshold))
+        Console.WriteLine($"  {line}");
+    Console.WriteLine($"CountExpensive(5000): {reports.CountExpensive(products, threshold)}");
+    Console.WriteLine($"HasVeryExpensive(50000): {reports.HasVeryExpensive(products, 50000m)}");
+    Console.WriteLine($"AllInStock: {reports.AllInStock(products)}");
+    Console.WriteLine($"Cheapest: {reports.Cheapest(products)}");
+    Console.WriteLine($"Порог изменён на 15000 → CountExpensive: {reports.CountExpensive(products, 15000m)} (код не менялся)");
 }
 
 RunAllDemos();
@@ -74,6 +88,7 @@ while (running)
     Console.WriteLine("5. Поступление товара на склад");
     Console.WriteLine("6. Продажа товара");
     Console.WriteLine("7. Каталог: сортировка");
+    Console.WriteLine("8. Отчёт: дорогие товары");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -120,6 +135,15 @@ while (running)
             catalog.PrintSortedByName();
             catalog.PrintSortedByNameLength();
             catalog.PrintSortedByPriceDesc();
+            break;
+        case "8":
+            Console.Write("Порог цены: ");
+            var limitPrice = decimal.TryParse(Console.ReadLine(), out var limit) ? limit : 5000m;
+            foreach (var expensiveLine in reports.ExpensiveProducts(products, limitPrice))
+                Console.WriteLine($"  {expensiveLine}");
+            Console.WriteLine($"Дороже порога: {reports.CountExpensive(products, limitPrice)} шт.");
+            Console.WriteLine($"Есть ли дороже 50000: {reports.HasVeryExpensive(products, 50000m)}");
+            Console.WriteLine($"Самый дешёвый: {reports.Cheapest(products)}");
             break;
         case "0":
             RunAllDemos();
