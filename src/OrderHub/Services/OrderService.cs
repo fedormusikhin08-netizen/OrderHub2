@@ -103,4 +103,75 @@ public class OrderService
             Console.WriteLine($"  {action}");
     }
 
+    // ---- Этап 2. КТ32: история заказов клиента на LinkedList<T> ----
+
+    // ЗАДАЧА: объявите поле истории и узел текущего заказа:
+    // LinkedList<Order> orderHistory
+    // LinkedListNode<Order>? current
+    // подсказка: узел nullable, поэтому тип поля с вопросительным знаком
+    private readonly LinkedList<Order> orderHistory = new();
+    private LinkedListNode<Order>? current;
+
+    public void InitHistory(params Order[] orders)
+    {
+        // ЗАДАЧА1: очистите историю (orderHistory.Clear())
+        orderHistory.Clear();
+        current = null;
+
+        // ЗАДАЧА2: добавьте заказы по очереди методом AddLast
+        // ЗАДАЧА3: сохраните в current узел последнего добавленного заказа
+        // подсказка: AddLast возвращает узел — сохраняйте возвращённое значение,
+        // тогда не придётся искать его через Find
+        foreach (var order in orders)
+            current = orderHistory.AddLast(order);
+    }
+
+    public bool PlaceOrderAfterCurrent(Order order)
+    {
+        // ЗАДАЧА1: добавьте новый заказ в историю через AddAfter(current, order)
+        // подсказка: если current == null, сначала вызовите InitHistory или
+        // сделайте AddLast и запомните узел — иначе AddAfter бросит ArgumentNullException
+        if (current == null)
+            current = orderHistory.AddLast(order);
+        else
+            current = orderHistory.AddAfter(current, order);
+
+        // ЗАДАЧА2: переставьте current на новый узел
+        // ЗАДАЧА3: верните true
+        return true;
+    }
+
+    public bool TryFindOrder(string customerName, out Order? order)
+    {
+        // ЗАДАЧА: найдите узел через Find, проверьте его на null
+        // подсказка: LINQ-расширениеFirstOrDefault тоже подойдёт, но тема требует именно Find
+        // примечание: Find(value) сравнивает значение целиком (для Order — по ссылке),
+        // поэтому узел ищем обходом цепочки; проверка node на null обязательна
+        LinkedListNode<Order>? node = orderHistory.First;
+        while (node != null && node.Value.CustomerName != customerName)
+            node = node.Next;
+
+        // ЗАДАЧА: если узел найден — запишите order = node.Value и верните true, иначе false
+        if (node == null)
+        {
+            order = null;
+            return false;
+        }
+
+        order = node.Value;
+        return true;
+    }
+
+    public void PrintHistory()
+    {
+        Console.WriteLine("--- История заказов клиента (LinkedList<Order>) ---");
+        // ЗАДАЧА: переберите историю через foreach и выведите каждый заказ
+        foreach (var order in orderHistory)
+            Console.WriteLine($"  {order}");
+
+        // ЗАДАЧА: отдельно выведите текущий заказ через current?.Value
+        Console.WriteLine(current is null
+            ? "  Текущий заказ не задан."
+            : $"  Текущий заказ: {current.Value}");
+    }
 }
