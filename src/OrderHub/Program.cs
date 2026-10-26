@@ -79,6 +79,17 @@ void RunAllDemos()
         Console.WriteLine($"  {row.Category}: {row.Count} шт., средняя {row.AveragePrice:0.00}₽");
     Console.WriteLine($"Самая дорогая категория: {reports.MostExpensiveCategory(products)?.Category}");
     Console.WriteLine($"Категорий с 3 и более товарами: {string.Join(", ", reports.CategoriesWithAtLeast(products, 3))}");
+
+    // ---- КТ37: Join и топ-3 клиентов ----
+    Console.WriteLine("\n--- КТ37: Join + GroupBy + Sum + Take: топ-3 клиентов ---");
+    var customers = SeedData.CreateCustomers();
+    foreach (var topLine in reports.TopCustomers(customers, seed, 3))
+        Console.WriteLine($"  {topLine}");
+    Console.WriteLine($"Выручка за 2026 год: {reports.RevenueForYear(seed, 2026):0.00}₽");
+    Console.WriteLine($"Клиент с наибольшим числом заказов: {reports.CustomerWithMostOrders(customers, seed)}");
+    Console.WriteLine("Заказы выше средней суммы:");
+    foreach (var bigOrder in reports.OrdersAboveAverage(seed))
+        Console.WriteLine($"  {bigOrder}");
 }
 
 RunAllDemos();
@@ -97,6 +108,7 @@ while (running)
     Console.WriteLine("7. Каталог: сортировка");
     Console.WriteLine("8. Отчёт: дорогие товары");
     Console.WriteLine("9. Сводка по категориям");
+    Console.WriteLine("10. Топ-3 клиентов");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -158,6 +170,12 @@ while (running)
                 Console.WriteLine($"  {summaryRow.Category}: {summaryRow.Count} шт., средняя {summaryRow.AveragePrice:0.00}₽");
             Console.WriteLine($"Самая дорогая категория: {reports.MostExpensiveCategory(products)?.Category}");
             Console.WriteLine($"Категорий с 3+ товарами: {string.Join(", ", reports.CategoriesWithAtLeast(products, 3))}");
+            break;
+        case "10":
+            foreach (var clientLine in reports.TopCustomers(SeedData.CreateCustomers(), SeedData.CreateOrders(), 3))
+                Console.WriteLine($"  {clientLine}");
+            Console.WriteLine($"Выручка за 2026 год: {reports.RevenueForYear(SeedData.CreateOrders(), 2026):0.00}₽");
+            Console.WriteLine($"Клиент с наибольшим числом заказов: {reports.CustomerWithMostOrders(SeedData.CreateCustomers(), SeedData.CreateOrders())}");
             break;
         case "0":
             RunAllDemos();

@@ -101,4 +101,60 @@ public class ReportService
             .ToList();
     }
 
+    // ---- Этап 7. КТ37: запросы к коллекциям, Join и Take ----
+
+    public List<string> TopCustomers(IEnumerable<Customer> customers, IEnumerable<Order> orders, int topCount)
+    {
+        // ЗАДАЧА1: соедините коллекции через Join по ключу Customer.Id / Order.CustomerName,
+        // если идентификаторы строковые; при строковом ключе соединяйтесь по Name
+        // ЗАДАЧА2: сгруппируйте результат по имени клиента через GroupBy
+        // ЗАДАЧА3: посчитайте сумму заказов клиента (Sum)
+        // ЗАДАЧА4: отсортируйте по убыванию суммы (OrderByDescending)
+        // ЗАДАЧА5: оставьте первые topCount записей через Take
+        // ЗАДАЧА6: спроецируйте в строку $"{имя} — {сумма:0.00}₽"
+        // ручная агрегация в переменных через foreach не засчитывается
+        return customers
+            .Join(orders,
+                  c => c.Name,
+                  o => o.CustomerName,
+                  (c, o) => new { c.Name, o.Price })
+            .GroupBy(x => x.Name)
+            .Select(g => new
+            {
+                Name = g.Key,
+                Total = g.Sum(x => x.Price)
+            })
+            .OrderByDescending(x => x.Total)
+            .Take(topCount)
+            .Select(x => $"{x.Name} — {x.Total:0.00}₽")
+            .ToList();
+    }
+
+    public decimal RevenueForYear(IEnumerable<Order> orders, int year)
+    {
+        // ЗАДАЧА: посчитайте общую выручку по заказам заданного года одним LINQ-вызовом
+        // подсказка: orders.Where(o => o.CreatedAt.Year == 2026).Sum(o => o.Price)
+        return orders.Where(o => o.CreatedAt.Year == year).Sum(o => o.Price);
+    }
+
+    public string? CustomerWithMostOrders(IEnumerable<Customer> customers, IEnumerable<Order> orders)
+    {
+        // ЗАДАЧА: найдите клиента с наибольшим числом заказов
+        // подсказка: GroupBy → OrderByDescending(g => g.Count()) → Select(g => g.Key) → FirstOrDefault()
+        return customers
+            .Join(orders, c => c.Name, o => o.CustomerName, (c, o) => c.Name)
+            .GroupBy(name => name)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .FirstOrDefault();
+    }
+
+    public List<Order> OrdersAboveAverage(IEnumerable<Order> orders)
+    {
+        // ЗАДАЧА: выведите заказы, у которых сумма выше средней по всем заказам
+        // подсказка: сначала посчитайте среднее отдельным запросом, затем Where
+        var list = orders.ToList();
+        var average = list.Average(o => o.Price);
+        return list.Where(o => o.Price > average).ToList();
+    }
 }
