@@ -72,6 +72,13 @@ void RunAllDemos()
     Console.WriteLine($"AllInStock: {reports.AllInStock(products)}");
     Console.WriteLine($"Cheapest: {reports.Cheapest(products)}");
     Console.WriteLine($"Порог изменён на 15000 → CountExpensive: {reports.CountExpensive(products, 15000m)} (код не менялся)");
+
+    // ---- КТ36: сводка по категориям ----
+    Console.WriteLine("\n--- КТ36: GroupBy: сводка по категориям ---");
+    foreach (var row in reports.SummarizeByCategory(products))
+        Console.WriteLine($"  {row.Category}: {row.Count} шт., средняя {row.AveragePrice:0.00}₽");
+    Console.WriteLine($"Самая дорогая категория: {reports.MostExpensiveCategory(products)?.Category}");
+    Console.WriteLine($"Категорий с 3 и более товарами: {string.Join(", ", reports.CategoriesWithAtLeast(products, 3))}");
 }
 
 RunAllDemos();
@@ -89,6 +96,7 @@ while (running)
     Console.WriteLine("6. Продажа товара");
     Console.WriteLine("7. Каталог: сортировка");
     Console.WriteLine("8. Отчёт: дорогие товары");
+    Console.WriteLine("9. Сводка по категориям");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -144,6 +152,12 @@ while (running)
             Console.WriteLine($"Дороже порога: {reports.CountExpensive(products, limitPrice)} шт.");
             Console.WriteLine($"Есть ли дороже 50000: {reports.HasVeryExpensive(products, 50000m)}");
             Console.WriteLine($"Самый дешёвый: {reports.Cheapest(products)}");
+            break;
+        case "9":
+            foreach (var summaryRow in reports.SummarizeByCategory(products))
+                Console.WriteLine($"  {summaryRow.Category}: {summaryRow.Count} шт., средняя {summaryRow.AveragePrice:0.00}₽");
+            Console.WriteLine($"Самая дорогая категория: {reports.MostExpensiveCategory(products)?.Category}");
+            Console.WriteLine($"Категорий с 3+ товарами: {string.Join(", ", reports.CategoriesWithAtLeast(products, 3))}");
             break;
         case "0":
             RunAllDemos();
