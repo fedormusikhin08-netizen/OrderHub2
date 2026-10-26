@@ -1,3 +1,4 @@
+using OrderHub.Data;
 using OrderHub.Services;
 
 Console.WriteLine("=== OrderHub — учёт заказов интернет-магазина ===");
@@ -16,6 +17,19 @@ void RunAllDemos()
     orders.PrintAllOrders();
     orders.PrintPendingQueue();
     orders.PrintRecentActions();
+
+    // ---- КТ32: история клиента на LinkedList ----
+    Console.WriteLine("\n--- КТ32: история заказов клиента (LinkedList) ---");
+    var seed = SeedData.CreateOrders();
+    orders.InitHistory(seed[0], seed[1], seed[2]);
+    orders.PlaceOrderAfterCurrent(seed[4]);
+    orders.PrintHistory();
+    if (orders.TryFindOrder("Иванов", out var found))
+        Console.WriteLine($"Поиск «Иванов»: найден заказ {found}");
+    else
+        Console.WriteLine("Поиск «Иванов»: заказ не найден");
+    if (!orders.TryFindOrder("Нет такого", out _))
+        Console.WriteLine("Поиск «Нет такого»: false, без исключения");
 }
 
 RunAllDemos();
@@ -28,6 +42,7 @@ while (running)
     Console.WriteLine("1. Добавить заказ в очередь");
     Console.WriteLine("2. Обработать следующий заказ");
     Console.WriteLine("3. Отменить последнее действие");
+    Console.WriteLine("4. История заказов клиента");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -48,6 +63,9 @@ while (running)
             break;
         case "3":
             orders.UndoLastAction();
+            break;
+        case "4":
+            orders.PrintHistory();
             break;
         case "0":
             RunAllDemos();
