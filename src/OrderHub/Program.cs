@@ -4,6 +4,7 @@ using OrderHub.Services;
 Console.WriteLine("=== OrderHub — учёт заказов интернет-магазина ===");
 
 var orders = new OrderService();
+var warehouse = new WarehouseService();
 
 void RunAllDemos()
 {
@@ -30,6 +31,20 @@ void RunAllDemos()
         Console.WriteLine("Поиск «Иванов»: заказ не найден");
     if (!orders.TryFindOrder("Нет такого", out _))
         Console.WriteLine("Поиск «Нет такого»: false, без исключения");
+
+    // ---- КТ33: склад на Dictionary ----
+    Console.WriteLine("\n--- КТ33: склад товаров (Dictionary<string, int>) ---");
+    warehouse.Receive("Клавиатура", 10);
+    warehouse.Receive("Клавиатура", 5);   // количество увеличивается, а не заводится вторая запись
+    warehouse.Receive("Монитор", 3);
+    warehouse.Sell("Монитор", 1);
+    warehouse.Sell("Монитор", 99);        // предупреждение: товара недостаточно
+    warehouse.Sell("Проектор", 1);        // сообщение: товара нет на складе, без исключения
+    warehouse.PrintStock();
+    if (warehouse.TryGetStock("Клавиатура", out var count))
+        Console.WriteLine($"TryGetStock(\"Клавиатура\") → {count} шт.");
+    if (!warehouse.TryGetStock("Проектор", out _))
+        Console.WriteLine("TryGetStock(\"Проектор\") → false, остаток 0");
 }
 
 RunAllDemos();
@@ -43,6 +58,8 @@ while (running)
     Console.WriteLine("2. Обработать следующий заказ");
     Console.WriteLine("3. Отменить последнее действие");
     Console.WriteLine("4. История заказов клиента");
+    Console.WriteLine("5. Поступление товара на склад");
+    Console.WriteLine("6. Продажа товара");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -66,6 +83,22 @@ while (running)
             break;
         case "4":
             orders.PrintHistory();
+            break;
+        case "5":
+            Console.Write("Название товара: ");
+            var stockName = Console.ReadLine()?.Trim() ?? "";
+            Console.Write("Количество: ");
+            var stockQty = int.TryParse(Console.ReadLine(), out var q) ? q : 1;
+            warehouse.Receive(stockName, stockQty);
+            warehouse.PrintStock();
+            break;
+        case "6":
+            Console.Write("Название товара: ");
+            var sellName = Console.ReadLine()?.Trim() ?? "";
+            Console.Write("Количество: ");
+            var sellQty = int.TryParse(Console.ReadLine(), out var sq) ? sq : 1;
+            warehouse.Sell(sellName, sellQty);
+            warehouse.PrintStock();
             break;
         case "0":
             RunAllDemos();
