@@ -90,6 +90,20 @@ void RunAllDemos()
     Console.WriteLine("Заказы выше средней суммы:");
     foreach (var bigOrder in reports.OrdersAboveAverage(seed))
         Console.WriteLine($"  {bigOrder}");
+
+    // ---- КТ38: ленивые итераторы ----
+    Console.WriteLine("\n--- КТ38: yield return: ленивое выполнение ---");
+    Console.WriteLine("После вызова метода Orders() ещё НИ ОДНОЙ строки трассировки:");
+    var lazyOrders = OrderStream.Orders();   // код итератора пока не выполнялся
+    Console.WriteLine("(это подтверждение ленивости — перебора ещё не было)");
+    Console.WriteLine("Дальше foreach + Take(5):");
+    foreach (var lazyOrder in lazyOrders.Take(5))
+        Console.WriteLine($"  {lazyOrder}");
+    Console.WriteLine("Конечный итератор Expensive(10, 10000):");
+    foreach (var priceyOrder in OrderStream.Expensive(10, 10000m))
+        Console.WriteLine($"  {priceyOrder}");
+    Console.WriteLine("Почему Orders().ToList() завис бы: ToList() ждёт следующий элемент, а конца у");
+    Console.WriteLine("бесконечного итератора нет. Take(N) ограничивает обход и останавливает программу.");
 }
 
 RunAllDemos();
@@ -109,6 +123,7 @@ while (running)
     Console.WriteLine("8. Отчёт: дорогие товары");
     Console.WriteLine("9. Сводка по категориям");
     Console.WriteLine("10. Топ-3 клиентов");
+    Console.WriteLine("11. Ленивая выдача заказов");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -176,6 +191,16 @@ while (running)
                 Console.WriteLine($"  {clientLine}");
             Console.WriteLine($"Выручка за 2026 год: {reports.RevenueForYear(SeedData.CreateOrders(), 2026):0.00}₽");
             Console.WriteLine($"Клиент с наибольшим числом заказов: {reports.CustomerWithMostOrders(SeedData.CreateCustomers(), SeedData.CreateOrders())}");
+            break;
+        case "11":
+            Console.WriteLine("После вызова метода Orders() строк трассировки нет:");
+            var stream = OrderStream.Orders();
+            Console.WriteLine("Перебор с Take(5):");
+            foreach (var streamedOrder in stream.Take(5))
+                Console.WriteLine($"  {streamedOrder}");
+            Console.WriteLine("Expensive(10, 10000):");
+            foreach (var filteredOrder in OrderStream.Expensive(10, 10000m))
+                Console.WriteLine($"  {filteredOrder}");
             break;
         case "0":
             RunAllDemos();
