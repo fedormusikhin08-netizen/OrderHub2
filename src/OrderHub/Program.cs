@@ -5,6 +5,11 @@ Console.WriteLine("=== OrderHub — учёт заказов интернет-м�
 
 var orders = new OrderService();
 var warehouse = new WarehouseService();
+var catalog = new CatalogService();
+
+var products = SeedData.CreateProducts();
+foreach (var product in products)
+    catalog.AddProduct(product.Name, product.Price, product.Category);
 
 void RunAllDemos()
 {
@@ -45,6 +50,14 @@ void RunAllDemos()
         Console.WriteLine($"TryGetStock(\"Клавиатура\") → {count} шт.");
     if (!warehouse.TryGetStock("Проектор", out _))
         Console.WriteLine("TryGetStock(\"Проектор\") → false, остаток 0");
+
+    // ---- КТ34: три способа сортировки каталога ----
+    Console.WriteLine("\n--- КТ34: сортировка каталога (IComparable, IComparer, лямбда) ---");
+    catalog.PrintAll();
+    catalog.PrintSortedByNaturalOrder();          // IComparable<Product>: по возрастанию цены
+    catalog.PrintSortedByName();                  // NameComparer: по алфавиту
+    catalog.PrintSortedByNameLength();            // лямбда Comparison<T>: по длине названия
+    catalog.PrintSortedByPriceDesc();             // PriceDescComparer: по убыванию цены
 }
 
 RunAllDemos();
@@ -60,6 +73,7 @@ while (running)
     Console.WriteLine("4. История заказов клиента");
     Console.WriteLine("5. Поступление товара на склад");
     Console.WriteLine("6. Продажа товара");
+    Console.WriteLine("7. Каталог: сортировка");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -99,6 +113,13 @@ while (running)
             var sellQty = int.TryParse(Console.ReadLine(), out var sq) ? sq : 1;
             warehouse.Sell(sellName, sellQty);
             warehouse.PrintStock();
+            break;
+        case "7":
+            catalog.PrintAll();
+            catalog.PrintSortedByNaturalOrder();
+            catalog.PrintSortedByName();
+            catalog.PrintSortedByNameLength();
+            catalog.PrintSortedByPriceDesc();
             break;
         case "0":
             RunAllDemos();
