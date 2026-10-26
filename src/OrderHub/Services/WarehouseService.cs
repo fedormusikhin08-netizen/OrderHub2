@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace OrderHub.Services;
 
@@ -32,7 +32,7 @@ public class WarehouseService
         // (никаких исключений: используйте TryGetValue)
         if (!stock.TryGetValue(productName, out var current))
         {
-            Console.WriteLine($"Продажа невозможна: товар «{productName}» нет на складе.");
+            Console.WriteLine($"Продажа невозможна: товара «{productName}» нет на складе.");
             return false;
         }
 
