@@ -1,3 +1,4 @@
+using OrderHub.Collections;
 using OrderHub.Data;
 using OrderHub.Services;
 
@@ -104,6 +105,16 @@ void RunAllDemos()
         Console.WriteLine($"  {priceyOrder}");
     Console.WriteLine("Почему Orders().ToList() завис бы: ToList() ждёт следующий элемент, а конца у");
     Console.WriteLine("бесконечного итератора нет. Take(N) ограничивает обход и останавливает программу.");
+
+    // ---- КТ39: пользовательский итератор CircularBuffer ----
+    Console.WriteLine("\n--- КТ39: CircularBuffer<T>: foreach и обратный обход ---");
+    var buffer = new CircularBuffer<string>(3);
+    foreach (var value in new[] { "1", "2", "3", "4", "5" })
+        buffer.Add(value);                 // ёмкость 3 → элементы 1 и 2 перезаписаны
+    Console.WriteLine("Обход foreach (от старого к новому): " + string.Join(", ", buffer));
+    Console.WriteLine("Обход Reverse() (от нового к старому): " + string.Join(", ", buffer.Reverse()));
+    Console.WriteLine($"Count = {buffer.Count}, IsFull = {buffer.IsFull}");
+    Console.WriteLine("Через LINQ Select: " + string.Join(" ", buffer.Select(x => $"[{x}]")));
 }
 
 RunAllDemos();
@@ -124,6 +135,7 @@ while (running)
     Console.WriteLine("9. Сводка по категориям");
     Console.WriteLine("10. Топ-3 клиентов");
     Console.WriteLine("11. Ленивая выдача заказов");
+    Console.WriteLine("12. Последние заказы (буфер)");
     Console.WriteLine("0. Показать все отчёты");
     Console.WriteLine("q. Выход");
     Console.Write("Выбор: ");
@@ -201,6 +213,15 @@ while (running)
             Console.WriteLine("Expensive(10, 10000):");
             foreach (var filteredOrder in OrderStream.Expensive(10, 10000m))
                 Console.WriteLine($"  {filteredOrder}");
+            break;
+        case "12":
+            var ring = new CircularBuffer<string>(3);
+            foreach (var ringValue in new[] { "1", "2", "3", "4", "5" })
+                ring.Add(ringValue);
+            Console.WriteLine("foreach: " + string.Join(", ", ring));
+            Console.WriteLine("Reverse(): " + string.Join(", ", ring.Reverse()));
+            Console.WriteLine($"Count = {ring.Count}, IsFull = {ring.IsFull}");
+            Console.WriteLine("LINQ Select: " + string.Join(" ", ring.Select(x => $"[{x}]")));
             break;
         case "0":
             RunAllDemos();
